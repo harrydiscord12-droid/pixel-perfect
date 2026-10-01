@@ -127,7 +127,7 @@ export function GlassReel() {
           sh = `0 ${dir * -s2}px ${s2}px rgb(235 230 255 / .35), 0 ${dir * -s}px ${s}px rgb(235 230 255 / .18), 0 ${dir * +s2}px ${s2}px rgb(235 230 255 / .25)`;
         }
         const act = a < 0.5 ? "true" : "false";
-        const p = prev[i];
+        const p = prev[i]!;
         if (p.t !== tr) el.style.transform = p.t = tr;
         if (p.o !== op) el.style.opacity = p.o = op;
         if (p.f !== f) el.style.filter = p.f = f;
