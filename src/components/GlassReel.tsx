@@ -67,7 +67,7 @@ export function GlassReel() {
         el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
         el.style.opacity = String(opacity);
         el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
-        el.dataset.active = a < 0.5 ? "true" : "false";
+        el.dataset["active"] = a < 0.5 ? "true" : "false";
         el.style.setProperty("--focus", String(Math.max(0, 1 - a)));
       }
     };
