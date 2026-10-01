@@ -62,10 +62,9 @@ export function GlassReel() {
         const scale = a < 1 ? C.activeScale - (C.activeScale - 1) * a : 1 - (1 - C.minScale) * ease;
         const opacity = a < 1 ? 1 - 0.35 * a : Math.max(0, 0.65 * (1 - ease));
         const blur = (a < 0.6 ? 0 : C.maxBlur * ease) + speed * 2.5 * Math.min(a, 1.5);
-        const z = -a * 120;
         // compress spacing with depth for perspective feel
         const y = Math.sign(d) * (a < 1 ? a : 1 + (a - 1) * (0.92 - 0.12 * ease)) * h;
-        el.style.transform = `translate3d(0, ${y}px, ${z}px) scale(${scale})`;
+        el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
         el.style.opacity = String(opacity);
         el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
         el.dataset.active = a < 0.5 ? "true" : "false";
