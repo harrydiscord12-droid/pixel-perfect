@@ -273,7 +273,24 @@ export function GlassReel() {
           <span className="glass-text glass-text--lead">{LEAD_WORD}</span>
         </div>
         <div className="reel-column">
-          <div className="reel-focus-pane" aria-hidden />
+          <div
+            className="reel-focus-pane"
+            aria-hidden
+            style={{ transform: `translate(${panePos.x}px, ${panePos.y}px)` }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              e.currentTarget.setPointerCapture(e.pointerId);
+              paneDrag.current = { px: e.clientX, py: e.clientY, ox: panePos.x, oy: panePos.y };
+            }}
+            onPointerMove={(e) => {
+              const d = paneDrag.current;
+              if (!d) return;
+              setPanePos({ x: d.ox + e.clientX - d.px, y: d.oy + e.clientY - d.py });
+            }}
+            onPointerUp={() => {
+              paneDrag.current = null;
+            }}
+          />
           {ITEMS.map((label, i) => (
             <button
               key={label}
