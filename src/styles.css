@@ -190,7 +190,7 @@
 
 .reel-focus-pane {
   position: absolute; left: -0.6em; right: 0; top: 50%; height: calc(var(--row-h) * 1.35);
-  translate: 0 -50%; border-radius: 22px; font-size: calc(var(--row-h) * 0.7);
+  translate: 1.6em -50%; border-radius: 22px; font-size: calc(var(--row-h) * 0.7);
   background: linear-gradient(180deg, oklch(1 0 0 / 0.07), oklch(1 0 0 / 0.02)), var(--glass-fill);
   backdrop-filter: blur(6px) saturate(160%);
   border: 1px solid var(--glass-edge);
