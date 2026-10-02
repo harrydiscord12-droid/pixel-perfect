@@ -152,6 +152,10 @@
   --reel-tint: oklch(0.86 0.09 295);
   --reel-light-a: oklch(0.55 0.22 290 / 0.55);
   --reel-light-b: oklch(0.55 0.18 255 / 0.45);
+  --reel-motion-glow: oklch(0.82 0.17 304 / 0.82);
+  --reel-motion-streak-strong: oklch(0.92 0.08 300 / 0.62);
+  --reel-motion-streak-medium: oklch(0.78 0.14 275 / 0.44);
+  --reel-motion-streak-soft: oklch(0.72 0.18 320 / 0.28);
   --glass-fill: oklch(1 0 0 / 0.045);
   --glass-edge: oklch(1 0 0 / 0.14);
   --glass-highlight: oklch(1 0 0 / 0.35);
@@ -160,6 +164,8 @@
 
 .reel-stage {
   --row-h: clamp(40px, 7.2vh, 72px);
+  --motion-energy: 0;
+  --active-glow-radius: 22px;
   position: relative; height: 100dvh; width: 100%; overflow: hidden;
   background: var(--reel-bg); color: var(--reel-ink);
   font-family: var(--font-display); touch-action: none; user-select: none; cursor: grab;
@@ -206,7 +212,7 @@
   font-weight: 700;
   background: linear-gradient(180deg, var(--reel-ink) 20%, var(--reel-tint) 75%, oklch(0.7 0.12 280) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 0 calc(22px * var(--glow, 1)) oklch(0.75 0.15 295 / calc(0.45 * var(--glow, 1))));
+  filter: drop-shadow(0 0 var(--active-glow-radius) oklch(0.8 0.18 300 / calc(0.5 + 0.35 * var(--motion-energy))));
 }
 /* faint chromatic refraction on active word */
 .reel-item[data-active="true"] .glass-text::before,
