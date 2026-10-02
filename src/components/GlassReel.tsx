@@ -207,7 +207,7 @@ export function GlassReel() {
       vel = Math.max(-40, Math.min(40, vel));
     };
     const onDown = (e: PointerEvent) => {
-      if ((e.target as HTMLElement).closest(".reel-panel, .reel-panel-toggle")) return;
+      if ((e.target as HTMLElement).closest(".reel-panel, .reel-panel-toggle, .reel-focus-pane")) return;
       dragging = true;
       lastY = e.clientY;
       lastMoveT = performance.now();
