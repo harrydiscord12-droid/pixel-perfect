@@ -30,7 +30,7 @@ export const DEFAULTS = {
   glow: 1,
   autoplay: 1,
   idleDelay: 3.5, // seconds
-  idleInterval: 2, // seconds
+  idleInterval: 2, // seconds per item while continuously auto-scrolling
   lightSpeed: 1,
 };
 export type ReelConfig = typeof DEFAULTS;
@@ -50,7 +50,7 @@ const CONTROLS: { key: keyof ReelConfig; label: string; min: number; max: number
   { key: "glow", label: "Glow", min: 0, max: 2, step: 0.05 },
   { key: "autoplay", label: "Autoplay (0/1)", min: 0, max: 1, step: 1 },
   { key: "idleDelay", label: "Idle delay (s)", min: 1, max: 15, step: 0.5 },
-  { key: "idleInterval", label: "Auto step (s)", min: 0.6, max: 6, step: 0.1 },
+  { key: "idleInterval", label: "Auto speed (s/item)", min: 0.6, max: 6, step: 0.1 },
   { key: "lightSpeed", label: "Light speed", min: 0, max: 3, step: 0.05 },
 ];
 
@@ -75,7 +75,8 @@ export function GlassReel() {
   }, [cfg.lightSpeed, cfg.glow]);
 
   useEffect(() => {
-    const stage = stageRef.current!;
+    const stage = stageRef.current;
+    if (!stage) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let pos = 4;
@@ -85,10 +86,10 @@ export function GlassReel() {
     let lastY = 0;
     let lastMoveT = 0;
     let lastInteract = performance.now();
-    let lastAuto = 0;
     let lastT = performance.now();
     let raf = 0;
     let rowH = 64;
+    let previousMotionEnergy = "";
     const prev = ITEMS.map(() => ({ t: "", o: "", f: "", s: "", a: "" }));
 
     const measure = () => {
@@ -102,6 +103,13 @@ export function GlassReel() {
       const h = rowH * C.spacing;
       const v = Math.abs(vel);
       const streak = Math.min(v * 0.9, 14) * C.motionBlur; // px
+      const motionEnergy = Math.min(v / 4.5, 1);
+      const motionEnergyValue = motionEnergy.toFixed(3);
+      if (previousMotionEnergy !== motionEnergyValue) {
+        previousMotionEnergy = motionEnergyValue;
+        stage.style.setProperty("--motion-energy", motionEnergyValue);
+        stage.style.setProperty("--active-glow-radius", `${(22 + motionEnergy * 34).toFixed(1)}px`);
+      }
       const dir = Math.sign(vel);
       for (let i = 0; i < N; i++) {
         const el = itemRefs.current[i];
@@ -120,12 +128,21 @@ export function GlassReel() {
         const fb = Math.round(blur * 4) / 4;
         const f = fb > 0 ? `blur(${fb}px)` : "none";
         // directional motion blur: stacked translucent copies along velocity
-        let sh = "none";
+        const shadows: string[] = [];
+        if (motionEnergy > 0.015 && opacity > 0.02) {
+          const glowRadius = (7 + motionEnergy * 25) * C.glow;
+          shadows.push(`0 0 ${glowRadius.toFixed(1)}px var(--reel-motion-glow)`);
+        }
         if (streak > 0.4 && opacity > 0.02) {
           const s = streak.toFixed(1);
           const s2 = (streak * 0.5).toFixed(1);
-          sh = `0 ${dir * -s2}px ${s2}px rgb(235 230 255 / .35), 0 ${dir * -s}px ${s}px rgb(235 230 255 / .18), 0 ${dir * +s2}px ${s2}px rgb(235 230 255 / .25)`;
+          shadows.push(
+            `0 ${dir * -s2}px ${s2}px var(--reel-motion-streak-strong)`,
+            `0 ${dir * -s}px ${s}px var(--reel-motion-streak-soft)`,
+            `0 ${dir * +s2}px ${s2}px var(--reel-motion-streak-medium)`,
+          );
         }
+        const sh = shadows.length > 0 ? shadows.join(", ") : "none";
         const act = a < 0.5 ? "true" : "false";
         const p = prev[i]!;
         if (p.t !== tr) el.style.transform = p.t = tr;
@@ -139,6 +156,15 @@ export function GlassReel() {
     const step = (dt: number, now: number) => {
       const C = cfgRef.current;
       if (dragging) return;
+      const autoScrolling = !reduce && C.autoplay >= 1 && now - lastInteract > C.idleDelay * 1000;
+      if (autoScrolling) {
+        target = null;
+        const cruiseVelocity = 1 / C.idleInterval;
+        const acceleration = 1 - Math.exp(-dt * 2.8);
+        vel += (cruiseVelocity - vel) * acceleration;
+        pos += vel * dt;
+        return;
+      }
       if (target !== null) {
         const k = C.stiffness;
         const c = 2 * Math.sqrt(k) * C.damping;
@@ -153,10 +179,6 @@ export function GlassReel() {
         vel *= Math.pow(C.friction, dt * 60);
         pos += vel * dt;
         if (Math.abs(vel) < 1.5) target = Math.round(pos + vel * 0.08);
-      }
-      if (!reduce && C.autoplay >= 1 && now - lastInteract > C.idleDelay * 1000 && now - lastAuto > C.idleInterval * 1000) {
-        lastAuto = now;
-        target = Math.round(target ?? pos) + 1;
       }
     };
 
