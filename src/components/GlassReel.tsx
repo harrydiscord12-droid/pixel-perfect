@@ -63,6 +63,8 @@ export function GlassReel() {
   const cfgRef = useRef<ReelConfig>({ ...DEFAULTS });
   const [cfg, setCfg] = useState<ReelConfig>(DEFAULTS);
   const [panel, setPanel] = useState(false);
+  const [panePos, setPanePos] = useState({ x: 0, y: 0 });
+  const paneDrag = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
 
   const update = (k: keyof ReelConfig, v: number) => {
     cfgRef.current = { ...cfgRef.current, [k]: v };
@@ -205,7 +207,7 @@ export function GlassReel() {
       vel = Math.max(-40, Math.min(40, vel));
     };
     const onDown = (e: PointerEvent) => {
-      if ((e.target as HTMLElement).closest(".reel-panel, .reel-panel-toggle")) return;
+      if ((e.target as HTMLElement).closest(".reel-panel, .reel-panel-toggle, .reel-focus-pane")) return;
       dragging = true;
       lastY = e.clientY;
       lastMoveT = performance.now();
@@ -273,7 +275,28 @@ export function GlassReel() {
           <span className="glass-text glass-text--lead">{LEAD_WORD}</span>
         </div>
         <div className="reel-column">
-          <div className="reel-focus-pane" aria-hidden />
+          <div
+            className="reel-focus-pane"
+            aria-hidden
+            style={{ transform: `translate(${panePos.x}px, ${panePos.y}px)` }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              paneDrag.current = { px: e.clientX, py: e.clientY, ox: panePos.x, oy: panePos.y };
+              try {
+                e.currentTarget.setPointerCapture(e.pointerId);
+              } catch {
+                /* synthetic events */
+              }
+            }}
+            onPointerMove={(e) => {
+              const d = paneDrag.current;
+              if (!d) return;
+              setPanePos({ x: d.ox + e.clientX - d.px, y: d.oy + e.clientY - d.py });
+            }}
+            onPointerUp={() => {
+              paneDrag.current = null;
+            }}
+          />
           {ITEMS.map((label, i) => (
             <button
               key={label}
