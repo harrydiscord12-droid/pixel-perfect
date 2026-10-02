@@ -292,6 +292,7 @@ export function GlassReel() {
             onPointerMove={(e) => {
               const d = paneDrag.current;
               if (!d) return;
+              console.log("pane move", e.clientX, e.clientY);
               setPanePos({ x: d.ox + e.clientX - d.px, y: d.oy + e.clientY - d.py });
             }}
             onPointerUp={() => {
