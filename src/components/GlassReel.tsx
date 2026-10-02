@@ -281,8 +281,12 @@ export function GlassReel() {
             style={{ transform: `translate(${panePos.x}px, ${panePos.y}px)` }}
             onPointerDown={(e) => {
               e.stopPropagation();
-              e.currentTarget.setPointerCapture(e.pointerId);
               paneDrag.current = { px: e.clientX, py: e.clientY, ox: panePos.x, oy: panePos.y };
+              try {
+                e.currentTarget.setPointerCapture(e.pointerId);
+              } catch {
+                /* synthetic events */
+              }
             }}
             onPointerMove={(e) => {
               const d = paneDrag.current;
