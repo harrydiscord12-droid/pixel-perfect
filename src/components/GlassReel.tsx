@@ -63,6 +63,8 @@ export function GlassReel() {
   const cfgRef = useRef<ReelConfig>({ ...DEFAULTS });
   const [cfg, setCfg] = useState<ReelConfig>(DEFAULTS);
   const [panel, setPanel] = useState(false);
+  const [panePos, setPanePos] = useState({ x: 0, y: 0 });
+  const paneDrag = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
 
   const update = (k: keyof ReelConfig, v: number) => {
     cfgRef.current = { ...cfgRef.current, [k]: v };
